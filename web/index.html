@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#183c34">
+  <meta name="description" content="Atendimento da Empório da Música: instrumentos, pedidos e políticas com informações consultadas.">
+  <title>Empório da Música · Atendimento</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%23183c34'/%3E%3Ctext x='10' y='29' font-size='28' fill='%23e8b66b'%3E♪%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/static/styles.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#message">Ir para a mensagem</a>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Empório da Música">
+      <a class="brand" href="/" aria-label="Empório da Música — início">
+        <span class="brand-icon" aria-hidden="true">♪</span>
+        <span>empório<span class="brand-second">da música<span class="brand-dot">.</span></span></span>
+      </a>
+      <div class="sidebar-body">
+        <p class="eyebrow light">SUA MÚSICA COMEÇA AQUI</p>
+        <h2>Um espaço para<br>o seu próximo acorde.</h2>
+        <p class="sidebar-description">Encontre um instrumento, acompanhe seu pedido e tire suas dúvidas com a gente.</p>
+        <button class="new-conversation" id="new-conversation" type="button"><span aria-hidden="true">＋</span> Nova conversa</button>
+        <div class="sidebar-links">
+          <span class="sidebar-link selected"><span aria-hidden="true">◌</span> Atendimento</span>
+          <a class="sidebar-link" href="/manual" target="_blank" rel="noopener"><span aria-hidden="true">≡</span> Políticas da loja <span class="external" aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+      <div class="sidebar-bottom">
+        <div class="location"><span class="location-dot" aria-hidden="true"></span> Campo Grande, MS</div>
+        <p>Instrumentos. Histórias. Música.</p>
+        <svg class="strings" viewBox="0 0 240 140" aria-hidden="true"><path d="M-10 135C55 120 35 20 100 10S150 90 250 30M-10 145C60 128 40 28 105 18S155 98 250 38M-10 155C65 136 45 36 110 26S160 106 250 46M-10 165C70 144 50 44 115 34S165 114 250 54M-10 175C75 152 55 52 120 42S170 122 250 62M-10 185C80 160 60 60 125 50S175 130 250 70"/></svg>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div><p class="eyebrow">EMPÓRIO DA MÚSICA</p><h1>Atendimento</h1></div>
+        <div class="topbar-actions"><span class="environment-tag"><span aria-hidden="true"></span> Demonstração local</span><button id="technical-toggle" class="technical-toggle" type="button" aria-pressed="false" hidden><span aria-hidden="true">⌘</span> Modo técnico</button></div>
+      </header>
+
+      <section class="chat-area" aria-label="Conversa com o assistente">
+        <div class="welcome" id="welcome">
+          <div class="welcome-mark" aria-hidden="true"><span>♪</span><i></i></div>
+          <p class="eyebrow">PODE CHEGAR</p>
+          <h2>Como podemos<br><em>te ajudar hoje?</em></h2>
+          <p class="welcome-description">Do primeiro instrumento à próxima apresentação.<br>Vamos encontrar o que você precisa.</p>
+          <div class="suggestions" aria-label="Sugestões para começar">
+            <button class="suggestion" type="button" data-question="Quais violões disponíveis custam até R$ 1.000?"><span class="suggestion-icon" aria-hidden="true">♬</span><span><strong>Encontre seu instrumento</strong><small>Violões até R$ 1.000</small></span><span class="suggestion-arrow" aria-hidden="true">↗</span></button>
+            <button class="suggestion" type="button" data-question="Quanto custa o Ohana CK-20? O desconto acumula com PIX?"><span class="suggestion-icon" aria-hidden="true">◇</span><span><strong>Preços e condições</strong><small>Ohana CK-20 e pagamento no PIX</small></span><span class="suggestion-arrow" aria-hidden="true">↗</span></button>
+            <button class="suggestion" type="button" data-question="Qual o status do pedido 8?"><span class="suggestion-icon" aria-hidden="true">▧</span><span><strong>Acompanhe seu pedido</strong><small>Consultar o pedido da demonstração</small></span><span class="suggestion-arrow" aria-hidden="true">↗</span></button>
+            <button class="suggestion" type="button" data-question="Me arrependi da minha compra online. Posso devolver?"><span class="suggestion-icon" aria-hidden="true">↶</span><span><strong>Trocas e devoluções</strong><small>Entenda as políticas da loja</small></span><span class="suggestion-arrow" aria-hidden="true">↗</span></button>
+          </div>
+          <div class="source-note"><span aria-hidden="true">◈</span> Respostas com base no catálogo e no manual da loja.</div>
+        </div>
+        <div id="messages" class="messages" role="log" aria-live="polite" aria-label="Mensagens"></div>
+        <div id="connection-error" class="connection-error" role="alert" hidden></div>
+      </section>
+
+      <div class="composer-area">
+        <form id="chat-form" class="composer">
+          <label class="sr-only" for="message">Sua mensagem</label>
+          <textarea id="message" name="message" placeholder="Pergunte sobre instrumentos, pedidos ou políticas…" rows="1" maxlength="2000" required></textarea>
+          <button id="send" class="send-button" type="submit" aria-label="Enviar mensagem"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5m-6 6 6-6 6 6"/></svg></button>
+        </form>
+        <div class="composer-footer"><span>Dados fornecidos para o desafio · sem operações de compra</span><span id="character-count">0 / 2.000</span></div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
