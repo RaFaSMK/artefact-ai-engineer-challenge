@@ -1,0 +1,16 @@
+# Contexto de build explícito: nenhum segredo ou artefato local é enviado.
+**
+!Dockerfile
+!requirements-lock.txt
+!pyproject.toml
+!src/
+!src/**
+!web/
+!web/**
+!data/
+!data/**
+!tests/
+!tests/**
+**/__pycache__/
+**/*.pyc
+**/*.pyo

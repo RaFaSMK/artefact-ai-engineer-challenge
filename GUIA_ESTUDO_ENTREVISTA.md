@@ -439,3 +439,17 @@ Essa foi uma escolha para preservar os fatos já consultados e evitar uma nova i
 O projeto está público em [RaFaSMK/artefact-ai-engineer-challenge](https://github.com/RaFaSMK/artefact-ai-engineer-challenge). A clonagem independente instalou as dependências travadas, reconstruiu a base, passou nos 64 testes e respondeu corretamente à pergunta do Ohana/PIX com o modelo real pela API. Os detalhes estão em [VALIDACAO_ENTREGA.md](VALIDACAO_ENTREGA.md).
 
 Na entrevista, diferencie a execução comprovada pelo repositório do que você pessoalmente reproduziu e revisou. A publicação não substitui o ensaio nem autoriza alterações depois do prazo do processo.
+
+## 19. Docker e reprodução do ambiente
+
+O Docker empacota Python 3.12, dependências travadas, código, interface e dados de entrada. O avaliador executa `docker compose up --build -d --wait`, depois de configurar `.env` e disponibilizar o modelo. A API inicializa a base quando ela não existe. Não é necessário instalar Python no computador do avaliador.
+
+O Ollama permanece no host para reutilizar o modelo e a aceleração já configurada. A aplicação o acessa por `http://host.docker.internal:11434`. Dentro de um contêiner, `localhost` identifica aquele contêiner; essa distinção explica a mudança de endereço no `.env`. O provedor remoto continua selecionável pelas mesmas variáveis, sem alterar código nem reconstruir a imagem apenas para trocar configuração.
+
+O servidor escuta em `0.0.0.0` dentro do contêiner para receber o encaminhamento de porta, mas o Compose publica em `127.0.0.1` no host. O processo usa um usuário sem privilégios. `.dockerignore` limita o contexto de construção: `.env`, ambientes virtuais, bancos, logs e histórico Git ficam de fora. A chave entra apenas no ambiente de execução.
+
+O healthcheck consulta `/health`: confirma que API e base iniciaram, mas não garante que o modelo esteja disponível. Uma pergunta real no chat completa essa verificação. O estágio `test` da imagem executa a bateria sem modelo real; o estágio `runtime` não inclui os arquivos de teste. Os resultados efetivamente observados estão no registro de validação.
+
+Decisão de escopo: não há volume persistente, pois o banco é derivado do snapshot e as sessões já são temporárias. Recriar o contêiner reconstrói a base e perde o histórico. Docker melhora a reprodução do ambiente; autenticação, deploy público, alta disponibilidade e aceleração de GPU dentro de contêiner permanecem fora desta entrega.
+
+Explicação curta para a entrevista: “Empacotei a aplicação com Docker para reduzir diferenças de instalação. Mantive o Ollama separado para aproveitar a GPU local. A configuração entra pelo ambiente, os dados são importados automaticamente e validei separadamente a saúde da API, os testes e uma consulta real ao modelo.” Os 64 testes passaram no contêiner e a consulta do Ohana/PIX retornou preço e fontes corretos. Os detalhes estão em `VALIDACAO_ENTREGA.md`; reproduza essa execução antes de apresentá-la.

@@ -13,7 +13,57 @@ git clone https://github.com/RaFaSMK/artefact-ai-engineer-challenge.git
 cd artefact-ai-engineer-challenge
 ```
 
-## Executar no Windows
+## Executar com Docker (sem instalar Python)
+
+Pré-requisitos: **Docker Desktop com contêineres Linux e Compose**, Git e Ollama aberto no computador. O contêiner executa a aplicação; o Ollama continua usando o modelo e a GPU do host. Não há download automático de modelo, nem uma segunda cópia dele na imagem.
+
+1. Na raiz do projeto, copie `Copy-Item .env.example .env` (Windows) ou `cp .env.example .env` (macOS/Linux). Se já existe `.env`, preserve suas configurações.
+2. Para Ollama, ajuste no `.env` **`LLM_BASE_URL=http://host.docker.internal:11434`**. `localhost` dentro do contêiner aponta para o próprio contêiner. Mantenha `LLM_PROVIDER=ollama` e `LLM_MODEL=qwen3:14b`.
+3. Baixe o modelo no host, se necessário: `ollama pull qwen3:14b`.
+4. Execute:
+
+```powershell
+docker compose up --build -d --wait
+```
+
+Abra [o chat](http://127.0.0.1:8765/) ou [a documentação da API](http://127.0.0.1:8765/docs). A primeira construção instala as dependências e pode demorar. A base SQLite é criada automaticamente a partir dos arquivos da imagem. O processo roda como usuário sem privilégios, e a porta é publicada apenas em `127.0.0.1`. Não é necessário executar `ingest` nem configurar Python no host.
+
+Comandos úteis:
+
+```powershell
+docker compose ps
+docker compose logs --tail 50 app
+docker compose down
+```
+
+Se a porta estiver ocupada, configure `APP_PORT=8766` no `.env` e abra `http://127.0.0.1:8766/`. Depois de alterar modelo, provedor ou endereço no `.env`, execute novamente `docker compose up -d --wait`: Compose recria o contêiner com o novo ambiente. `docker compose restart` sozinho não atualiza as variáveis.
+
+Para o provedor remoto, use as quatro variáveis do perfil OpenAI descrito abaixo, incluindo seu endereço HTTPS; a configuração do Compose não sobrescreve `LLM_BASE_URL`. Chaves são injetadas em execução e não são copiadas para a imagem. Não publique a saída de `docker compose config`, que pode expandir segredos.
+
+O contêiner não mantém histórico nem banco em volume: ao recriá-lo, as sessões são perdidas e o snapshot é reconstruído. Ao alterar CSVs, PDF, interface ou código, use `docker compose up --build -d --wait` para atualizar a imagem. O healthcheck verifica aplicação e base, **sem testar conectividade ou inferência do modelo**. Confirme também uma pergunta no chat.
+
+### Se o Ollama não responder ao contêiner
+
+Confira `ollama list` no host e teste o acesso pelo contêiner:
+
+```powershell
+docker compose exec app python -c "import os, urllib.request; print(urllib.request.urlopen(os.environ['LLM_BASE_URL'] + '/api/tags', timeout=5).status)"
+```
+
+Esse teste é para o perfil Ollama. No Docker Desktop, `host.docker.internal` identifica o host. Em Linux com Docker Engine, o Compose adiciona o mapeamento `host-gateway`; o Ollama precisa escutar em uma interface acessível à rede do Docker. Se ele escutar apenas em loopback e o teste falhar, configure `OLLAMA_HOST` conforme a [documentação do Ollama](https://docs.ollama.com/faq#how-do-i-configure-ollama-server) e reinicie o serviço. Se usar `0.0.0.0:11434`, restrinja a porta no firewall à rede necessária: a API do Ollama não deve ficar aberta à internet. A aplicação não altera essa configuração do sistema.
+
+Para verificar os testes dentro da imagem:
+
+```powershell
+docker build --target test -t emporio-test .
+docker run --rm emporio-test
+```
+
+Os testes simulam o modelo, sem precisar de Ollama ou chave. Para voltar à execução Python no host, restaure `LLM_BASE_URL=http://localhost:11434` no perfil local.
+
+Referências: [rede do Docker Desktop](https://docs.docker.com/desktop/features/networking/networking-how-tos/), [serviços Compose](https://docs.docker.com/reference/compose-file/services/) e [configuração do Ollama](https://docs.ollama.com/faq).
+
+## Executar diretamente no Windows
 
 Pré-requisitos: **Python 3.12** (versão usada na validação), Git e [Ollama](https://ollama.com/download). O projeto requer Python 3.12 ou superior, mas outras versões não foram verificadas nesta entrega. Execute os comandos abaixo na raiz do repositório.
 
@@ -171,6 +221,8 @@ IDs opacos separam históricos de conversas. Eles não autenticam pessoas. As se
 Os testes determinísticos verificam regras monetárias, disponibilidade, integridade da importação, recuperação de políticas, acesso a pedidos, configuração de provedores, sessões, contratos HTTP e comportamento controlado do loop. Eles simulam somente o modelo/rede. O relatório separado registra as conversas com o Qwen real e critérios explícitos de ferramenta, fonte e conteúdo. Uma bateria pequena não comprova qualidade geral.
 
 A [verificação de entrega](VALIDACAO_ENTREGA.md) registra a instalação em uma clonagem nova do repositório público: **64 testes passaram**, o banco foi reconstruído e a API respondeu a uma consulta com o modelo real. A avaliação local do agente passou nos **14 critérios específicos** definidos no relatório.
+
+O complemento Docker registra também **64 testes no contêiner Linux** e uma consulta real pela API usando o Ollama do host. Essa verificação de empacotamento não repetiu a bateria completa de conversas, pois o núcleo de atendimento não foi alterado.
 
 ## Limitações e próximos passos
 

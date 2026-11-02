@@ -575,6 +575,7 @@ Após cada etapa, registrar no guia: o que foi implementado, por que, como foi v
 - [x] README declara decisões, limitações e uso real de IA.
 - [x] Nenhuma chave, ambiente virtual, banco gerado ou log desnecessário versionado.
 - [x] Repositório público e histórico de commits conferidos.
+- [x] Configuração Docker e Compose adicionada, com instruções para Ollama no host e provedor remoto; resultados de execução registrados na validação.
 - [x] Guia atualizado para corresponder à versão final.
 - [ ] Apresentação de 5–7 minutos ensaiada e uma consulta rastreada no código.
 - [ ] Commit final identificado e repositório congelado no prazo.
