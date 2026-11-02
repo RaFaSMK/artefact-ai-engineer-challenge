@@ -170,6 +170,8 @@ IDs opacos separam históricos de conversas. Eles não autenticam pessoas. As se
 
 Os testes determinísticos verificam regras monetárias, disponibilidade, integridade da importação, recuperação de políticas, acesso a pedidos, configuração de provedores, sessões, contratos HTTP e comportamento controlado do loop. Eles simulam somente o modelo/rede. O relatório separado registra as conversas com o Qwen real e critérios explícitos de ferramenta, fonte e conteúdo. Uma bateria pequena não comprova qualidade geral.
 
+A [verificação de entrega](VALIDACAO_ENTREGA.md) registra a instalação em uma clonagem nova do repositório público: **64 testes passaram**, o banco foi reconstruído e a API respondeu a uma consulta com o modelo real. A avaliação local do agente passou nos **14 critérios específicos** definidos no relatório.
+
 ## Limitações e próximos passos
 
 - Snapshot estático, sem integração com estoque, transportadora, cadastro atual ou calendário de feriados.

@@ -426,10 +426,16 @@ Antes de usar esta folha, corrigir qualquer item que não tenha sido mantido na 
 - A validação das ferramentas informa campo e motivo do erro sem devolver os valores recebidos. PIX aceita normalização de maiúsculas e espaços, preservando o conjunto de formas permitido.
 - O relatório contém a identificação dos componentes de atendimento avaliados. API e CLI são verificados separadamente pelos testes e pela conferência de uso.
 - As expressões observadas de mistura de idioma e oferta de agendamento receberam uma camada de polimento testada. Ela preserva preços, termos técnicos e frases negativas. Não afirmar que essa cobertura de padrões conhecidos garante ausência de alucinação ou tom perfeito.
-- Estudar o código, ensaiar a apresentação, conferir o horário do processo e publicar o repositório ainda são etapas do candidato.
+- O repositório público foi publicado e uma clonagem nova foi validada. Estudar o código, ensaiar a apresentação, conferir o horário do processo e enviar o link ainda são etapas do candidato.
 
 ## 17. Polimento antes da publicação
 
 O módulo `responses.py` trata padrões conhecidos de oferta de ações que o chat não executa, como agendamento e reserva. Afirmações de execução sem ferramenta são substituídas pela capacidade real do protótipo. A expressão observada “algo else” é corrigida, preservando nomes e termos técnicos dos instrumentos.
 
 Essa foi uma escolha para preservar os fatos já consultados e evitar uma nova inferência apenas para corrigir um fechamento. Não é um avaliador geral de português. Os testes incluem preços, frases negativas, marcas, termos técnicos e consistência entre a resposta entregue e o histórico.
+
+## 18. Publicação e reprodução da entrega
+
+O projeto está público em [RaFaSMK/artefact-ai-engineer-challenge](https://github.com/RaFaSMK/artefact-ai-engineer-challenge). A clonagem independente instalou as dependências travadas, reconstruiu a base, passou nos 64 testes e respondeu corretamente à pergunta do Ohana/PIX com o modelo real pela API. Os detalhes estão em [VALIDACAO_ENTREGA.md](VALIDACAO_ENTREGA.md).
+
+Na entrevista, diferencie a execução comprovada pelo repositório do que você pessoalmente reproduziu e revisou. A publicação não substitui o ensaio nem autoriza alterações depois do prazo do processo.
