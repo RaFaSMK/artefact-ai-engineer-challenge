@@ -18,6 +18,7 @@ from .config import Settings
 from .policies import normalize, required_clarification
 from .prompts import SYSTEM_PROMPT
 from .repository import Repository
+from .responses import polish_response
 from .tools import build_tools
 
 
@@ -205,7 +206,7 @@ class Agent:
                     answer = "O modelo não conseguiu montar uma consulta válida. Pode reformular a pergunta?"
                     break
                 if not calls:
-                    candidate = message_text(result)
+                    candidate = polish_response(message_text(result))
                     values = money_values(candidate)
                     if candidate and not events and (needs_evidence(text) or values):
                         turn.pop()
@@ -227,7 +228,7 @@ class Agent:
                                 disclosures.append(f"{product['name']}: de {price['original_price']} por {price['final_price']} ({price['discount_percent']}% de desconto). O PIX não acumula com essa promoção.")
                         if disclosures:
                             candidate += "\n\n" + "\n".join(disclosures)
-                            result.content = candidate
+                        result.content = candidate
                         answer, status, completed = candidate, "ok", True
                         break
                     turn.append(HumanMessage(content="Antes de responder, consulte a ferramenta adequada. Não afirme fatos da loja sem uma consulta nesta mensagem.",
