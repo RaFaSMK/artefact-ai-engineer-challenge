@@ -1,6 +1,6 @@
 # Pedido e previsão antiga
 
-Execução real: 2026-11-01T21:05:23-03:00.
+Execução real: 2026-11-01T21:32:39-03:00.
 Modelo: `ollama/qwen3:14b`. Cliente fictício da demonstração: 2.
 
 **Cliente**
@@ -19,5 +19,5 @@ Registro técnico da execução:
 
 - Ferramentas: get_order_status (ok).
 - Chamadas ao modelo: 2.
-- Duração observada: 5.62s.
+- Duração observada: 5.69s.
 - Verificação automática `order`: passou.

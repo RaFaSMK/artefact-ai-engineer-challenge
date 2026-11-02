@@ -47,6 +47,11 @@ EXTRA_CASES = [
 ]
 
 
+def write_markdown(path, text):
+    """Formata a transcrição removendo somente espaços no fim das linhas."""
+    path.write_text("\n".join(line.rstrip() for line in text.splitlines()) + "\n", encoding="utf-8")
+
+
 def check(case, response):
     sources = {s.id for s in response.sources}
     tools = {e.tool for e in response.diagnostics.tools}
@@ -105,7 +110,7 @@ async def main():
                       f"- Duração observada: {response.diagnostics.elapsed_ms / 1000:.2f}s.",
                       f"- Verificação automática `{case}`: {'passou' if passed else 'falhou; revisar' }.", ""]
             print(f"{case}: {'PASS' if passed else 'FAIL'} ({response.diagnostics.elapsed_ms / 1000:.1f}s)", flush=True)
-        (output / f"{filename}.md").write_text("\n".join(lines), encoding="utf-8")
+        write_markdown(output / f"{filename}.md", "\n".join(lines))
     for question, case in EXTRA_CASES:
         response = await agent.chat(question)
         passed = check(case, response)
@@ -129,7 +134,7 @@ async def main():
                "- Uma resposta pode passar num critério de texto e ainda precisar de melhoria editorial ou semântica.",
                "- Há cinco transcrições completas ao lado deste relatório; todas foram produzidas pelo agente.",
                "- OpenAI e Llama não foram comparados neste relatório. A factory remota é coberta por teste sem requisição externa.", ""]
-    (output / "avaliacao.md").write_text("\n".join(report), encoding="utf-8")
+    write_markdown(output / "avaliacao.md", "\n".join(report))
     (ROOT / "runtime" / "evaluation.json").write_text(json.dumps(raw, ensure_ascii=False, indent=2), encoding="utf-8")
 
 

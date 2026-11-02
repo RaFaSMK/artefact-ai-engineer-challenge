@@ -1,6 +1,6 @@
 # Informações da loja e devolução
 
-Execução real: 2026-11-01T21:05:23-03:00.
+Execução real: 2026-11-01T21:32:39-03:00.
 Modelo: `ollama/qwen3:14b`. Cliente fictício da demonstração: 2.
 
 **Cliente**
@@ -9,7 +9,7 @@ Qual o endereço e o horário padrão de funcionamento da loja?
 
 **Assistente**
 
-A loja Empório da Música está localizada na Rua 14 de Maio, 3200 — Centro, Campo Grande - MS, 79202-333. O horário de funcionamento é de segunda a sexta-feira, das 09h às 18h, e no sábado, das 09h às 13h. No domingo e feriados, a loja está fechada. Em datas especiais, como Black Friday, Aniversário da Loja e Natal, o horário pode ser estendido, com comunicação prévia nas redes sociais e via WhatsApp.
+A loja Empório da Música está localizada na Rua 14 de Maio, 3200 — Centro, Campo Grande - MS, 79202-333. O horário de funcionamento é de segunda a sexta-feira, das 09h às 18h, e no sábado, das 09h às 13h. Domingos e feriados, a loja está fechada. Em datas especiais, como Black Friday, Aniversário da Loja e Natal, o horário pode ser estendido, com comunicação prévia nas redes sociais e via WhatsApp.
 
 Fontes consultadas:
 
@@ -20,7 +20,7 @@ Registro técnico da execução:
 
 - Ferramentas: search_policies (ok).
 - Chamadas ao modelo: 2.
-- Duração observada: 7.83s.
+- Duração observada: 8.03s.
 - Verificação automática `store`: passou.
 
 **Cliente**
@@ -29,7 +29,7 @@ Me arrependi da compra online, posso devolver? Ainda não informei quando recebi
 
 **Assistente**
 
-Para solicitar a devolução, precisamos que você informe em qual canal realizou a compra e a data em que efetivamente recebeu o produto. Além disso, precisamos saber se o item está em sua embalagem original, sem sinais de uso, com todos os acessórios e manuais. Com essas informações, podemos orientar você melhor sobre o processo de devolução.
+Para solicitar a devolução, precisamos que você informe em qual canal realizou a compra e a data em que efetivamente recebeu o produto. Além disso, é importante que o instrumento esteja em sua embalagem original, sem sinais de uso, com todos os acessórios e manuais. Com essas informações, podemos orientar você melhor sobre o processo de devolução.
 
 Fontes consultadas:
 
@@ -40,5 +40,5 @@ Registro técnico da execução:
 
 - Ferramentas: search_policies (ok).
 - Chamadas ao modelo: 3.
-- Duração observada: 9.86s.
+- Duração observada: 9.14s.
 - Verificação automática `return`: passou.

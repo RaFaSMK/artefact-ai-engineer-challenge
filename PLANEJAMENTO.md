@@ -6,7 +6,7 @@
 
 **Diretriz atualizada:** começar local pelo Ollama, usar LangChain para integrar modelos, mensagens e ferramentas, permitir troca de provedor pelo `.env` e entregar um chat web simples sobre uma API Python. A CLI permanece como entrada de apoio para diagnóstico.
 
-**Status deste documento:** primeira implementação local disponível em 01/11/2026, com núcleo Python, LangChain, API, chat web e CLI. A suíte automatizada foi executada com 45 testes passando. As conversas e a avaliação com o Qwen real estão em `examples/`; consulte o [README](README.md) para executar e o registro ao final do guia para estudar a versão implementada. A publicação no GitHub e o envio ao processo seletivo permanecem pendentes.
+**Status deste documento:** primeira implementação local disponível em 01/11/2026, com núcleo Python, LangChain, API, chat web e CLI. A suíte automatizada foi executada com 64 testes passando. As conversas e a avaliação com o Qwen real estão em `examples/`; consulte o [README](README.md) para executar e o registro ao final do guia para estudar a versão implementada. A publicação no GitHub e o envio ao processo seletivo permanecem pendentes.
   
 O documento complementar [GUIA_ESTUDO_ENTREVISTA.md](GUIA_ESTUDO_ENTREVISTA.md) explica a arquitetura, os pontos de estudo e o roteiro de apresentação. Ele deverá ser atualizado conforme a implementação real.
 

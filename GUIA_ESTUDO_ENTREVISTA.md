@@ -358,7 +358,7 @@ Registro da versão local verificada. Os comandos executáveis estão no README.
 | Conversa | Último ID inequívoco e histórico com turnos completos | Continuação no PIX com nova consulta | Testes e `examples/02_promocao_pix.md` | Memória só durante a sessão |
 | Web/API | Mesma função de atendimento, fontes do executor | Navegador: envio, carregamento, fontes, modo técnico, nova conversa e layout a 390px | Imagens em `examples/` e testes HTTP | Sem streaming nem autenticação de produção |
 | Avaliação | Critérios explícitos e transcrições reais | 14 cenários com Qwen; ver resultado e durações no relatório | `examples/avaliacao.md` | Não mede qualidade geral |
-| Instalação | Python 3.12 e dependências travadas | Instalação em um segundo ambiente virtual e suíte passando | `requirements-lock.txt`, 45 testes | Outros sistemas/versões não verificados |
+| Instalação | Python 3.12 e dependências travadas | Instalação em um segundo ambiente virtual e suíte passando | `requirements-lock.txt`, 64 testes | Outros sistemas/versões não verificados |
 
 ### O que os testes reais ensinaram
 
@@ -370,7 +370,7 @@ Registro da versão local verificada. Os comandos executáveis estão no README.
 
 ### Como apresentar a avaliação
 
-Abra `examples/avaliacao.md` e uma das cinco transcrições. Mostre os critérios e explique que foram verificações específicas de fonte, ferramenta e conteúdo. A suíte de 45 testes cobre regras e contratos de forma determinística. O resultado de uma bateria pequena não garante que qualquer pergunta futura será respondida corretamente.
+Abra `examples/avaliacao.md` e uma das cinco transcrições. Mostre os critérios e explique que foram verificações específicas de fonte, ferramenta e conteúdo. A suíte de 64 testes cobre regras e contratos de forma determinística. O resultado de uma bateria pequena não garante que qualquer pergunta futura será respondida corretamente.
 
 Para um problema encontrado, acrescentar uma anotação curta:
 
@@ -419,11 +419,17 @@ Antes de usar esta folha, corrigir qualquer item que não tenha sido mantido na 
 
 ## 16. Conferência final da versão local
 
-- 45 testes determinísticos passaram no ambiente principal e no segundo ambiente criado para verificar a instalação.
+- 64 testes determinísticos passaram no ambiente principal e no segundo ambiente criado para verificar a instalação.
 - A execução real registrada passou nos 14 critérios específicos do relatório com Qwen local. Os critérios não avaliam toda a qualidade editorial.
 - A CLI foi usada com entrada Unicode e resposta com emoji no Windows; `/nova` e `/sair` foram conferidos.
 - A revisão do navegador cobriu envio, carregamento, resposta, fontes, modo técnico, nova conversa e layout estreito, sem erros observados no console.
 - A validação das ferramentas informa campo e motivo do erro sem devolver os valores recebidos. PIX aceita normalização de maiúsculas e espaços, preservando o conjunto de formas permitido.
 - O relatório contém a identificação dos componentes de atendimento avaliados. API e CLI são verificados separadamente pelos testes e pela conferência de uso.
-- A revisão manual encontrou sugestões e frases a polir, descritas no relatório. Não afirmar que os testes garantem ausência de alucinação ou tom perfeito.
+- As expressões observadas de mistura de idioma e oferta de agendamento receberam uma camada de polimento testada. Ela preserva preços, termos técnicos e frases negativas. Não afirmar que essa cobertura de padrões conhecidos garante ausência de alucinação ou tom perfeito.
 - Estudar o código, ensaiar a apresentação, conferir o horário do processo e publicar o repositório ainda são etapas do candidato.
+
+## 17. Polimento antes da publicação
+
+O módulo `responses.py` trata padrões conhecidos de oferta de ações que o chat não executa, como agendamento e reserva. Afirmações de execução sem ferramenta são substituídas pela capacidade real do protótipo. A expressão observada “algo else” é corrigida, preservando nomes e termos técnicos dos instrumentos.
+
+Essa foi uma escolha para preservar os fatos já consultados e evitar uma nova inferência apenas para corrigir um fechamento. Não é um avaliador geral de português. Os testes incluem preços, frases negativas, marcas, termos técnicos e consistência entre a resposta entregue e o histórico.

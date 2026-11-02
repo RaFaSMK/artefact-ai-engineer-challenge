@@ -1,6 +1,6 @@
 # Catálogo e continuação
 
-Execução real: 2026-11-01T21:05:23-03:00.
+Execução real: 2026-11-01T21:32:39-03:00.
 Modelo: `ollama/qwen3:14b`. Cliente fictício da demonstração: 2.
 
 **Cliente**
@@ -11,13 +11,13 @@ Quais violões disponíveis custam até R$ 1.000?
 
 Aqui estão algumas opções de violões disponíveis com preço até R$ 1.000:
 
-1. Tagima Memphis AC-39 Nylon Natural – R$ 429,90 (15 unidades disponíveis).
-2. Rozini RC-104 Nylon Estudante – R$ 459,90 (10 unidades disponíveis).
-3. Shelby SN-100 Folk Aço Preto – R$ 549,00 (5 unidades disponíveis).
-4. Giannini GF-1R Aço Folk Sunburst – R$ 579,90 (7 unidades disponíveis).
-5. Yamaha C40 Nylon Natural – R$ 599,90 (12 unidades disponíveis).
+1. Tagima Memphis AC-39 Nylon Natural – R$ 429,90
+2. Rozini RC-104 Nylon Estudante – R$ 459,90
+3. Shelby SN-100 Folk Aço Preto – R$ 549,00
+4. Giannini GF-1R Aço Folk Sunburst – R$ 579,90
+5. Yamaha C40 Nylon Natural – R$ 599,90
 
-Se quiser mais detalhes sobre algum modelo, posso ajudar!
+Todos estão disponíveis no estoque. Se quiser mais detalhes sobre algum modelo, posso ajudar!
 
 Fontes consultadas:
 
@@ -31,7 +31,7 @@ Registro técnico da execução:
 
 - Ferramentas: search_products (ok).
 - Chamadas ao modelo: 2.
-- Duração observada: 12.08s.
+- Duração observada: 9.95s.
 - Verificação automática `catalog`: passou.
 
 **Cliente**
@@ -40,7 +40,7 @@ E o Yamaha C40, quanto fica no PIX?
 
 **Assistente**
 
-O Yamaha C40 Nylon Natural no PIX custa R$ 569,91, com um desconto de 5% em relação ao preço original de R$ 599,90. Estamos com 12 unidades disponíveis no momento. Deseja que eu reserve uma unidade para você?
+O Yamaha C40 Nylon Natural custa R$ 569,91 no PIX, com um desconto de 5% em relação ao preço original de R$ 599,90. O instrumento está disponível no estoque. Deseja mais informações?
 
 Fontes consultadas:
 
@@ -51,5 +51,5 @@ Registro técnico da execução:
 
 - Ferramentas: get_product (ok).
 - Chamadas ao modelo: 2.
-- Duração observada: 7.05s.
+- Duração observada: 6.22s.
 - Verificação automática `yamaha`: passou.

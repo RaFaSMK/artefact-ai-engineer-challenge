@@ -6,6 +6,13 @@ O modelo local inicial é **Qwen 3 14B pelo Ollama**, já disponível no ambient
 
 ![Chat web da Empório da Música](examples/interface-desktop.jpg)
 
+## Obter o código
+
+```powershell
+git clone https://github.com/RaFaSMK/artefact-ai-engineer-challenge.git
+cd artefact-ai-engineer-challenge
+```
+
 ## Executar no Windows
 
 Pré-requisitos: **Python 3.12** (versão usada na validação), Git e [Ollama](https://ollama.com/download). O projeto requer Python 3.12 ou superior, mas outras versões não foram verificadas nesta entrega. Execute os comandos abaixo na raiz do repositório.
@@ -123,6 +130,8 @@ A persona é informal e profissional. O prompt exige consulta antes de fatos ope
 
 Em continuações, o backend guarda o último ID de produto identificado sem ambiguidade e limpa essa referência quando a busca traz várias opções. Esse ID ajuda o modelo a resolver “e no PIX?”, mas uma nova consulta é exigida antes de repetir preços. Notas internas de correção não são guardadas como falas do cliente no histórico permanente da sessão.
 
+`responses.py` aplica um polimento limitado antes da entrega da resposta: remove ofertas de ações sem integração, substitui afirmações indevidas de execução por uma descrição das capacidades e corrige expressões de atendimento em inglês observadas nos testes. Os fatos e valores sustentados pelas fontes são preservados. O mesmo texto entregue é salvo no histórico. Essa camada não é um detector geral de idioma nem substitui a avaliação do modelo.
+
 As fontes são montadas pelo código a partir dos resultados consultados. O modo técnico opcional exibe somente nomes de ferramentas, status, duração e uso reportado, sem argumentos brutos ou dados de clientes. Não representa raciocínio interno do modelo.
 
 ## Dados e suposições
@@ -168,7 +177,7 @@ Os testes determinísticos verificam regras monetárias, disponibilidade, integr
 - Sem autenticação de produção, persistência de histórico, múltiplos processos ou deploy público.
 - Busca textual e regras de extração adaptadas ao manual recebido. Uma nova versão precisa de reimportação, revisão e testes; embeddings seriam avaliados se paráfrases falharem nos testes.
 - LangChain padroniza a integração, mas modelos ainda podem escolher argumentos inadequados ou responder mal. O projeto tem validações e evidências específicas, sem garantia de ausência de alucinações.
-- A revisão das conversas identificou frases a polir, como mistura pontual de inglês e convite a agendar visita, apesar de não haver agenda integrada. Nenhum agendamento é executado. A bateria automática verifica critérios delimitados e não mede todo o tom ou todas as sugestões do modelo.
+- O polimento cobre padrões conhecidos de ofertas sem integração e mistura de idioma, com testes de preservação de preços, negativas e termos de catálogo. Não cobre todas as formas possíveis de redação. A bateria automática verifica critérios delimitados e não mede todo o tom ou todas as sugestões do modelo.
 - Chat retorna JSON completo, com carregamento. Streaming de tokens, métricas operacionais persistentes e maior cobertura de avaliação são evoluções.
 - Qwen 3 14B foi o modelo usado na avaliação. Llama e execução remota precisam de avaliação real própria.
 
