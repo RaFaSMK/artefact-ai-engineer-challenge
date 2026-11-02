@@ -44,7 +44,10 @@ def create_app(settings: Settings | None = None, model=None) -> FastAPI:
         response = await call_next(request)
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["Referrer-Policy"] = "no-referrer"
-        response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; frame-ancestors 'none'"
+        # Swagger/ReDoc do FastAPI carregam seus próprios assets e inicialização inline.
+        # O chat usa somente assets locais e mantém a política restritiva.
+        if request.url.path not in {"/docs", "/redoc", "/docs/oauth2-redirect"}:
+            response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; frame-ancestors 'none'"
         if request.url.path.startswith(("/chat", "/conversations")):
             response.headers["Cache-Control"] = "no-store"
         return response

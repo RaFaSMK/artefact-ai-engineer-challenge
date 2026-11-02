@@ -61,6 +61,7 @@ class Conversation:
     turns: list[list[BaseMessage]] = field(default_factory=list)
     touched_at: float = field(default_factory=time.monotonic)
     lock: asyncio.Lock = field(default_factory=asyncio.Lock)
+    last_product_id: int | None = None
 
 
 class SessionNotFound(Exception):
@@ -118,6 +119,12 @@ def message_text(message: AIMessage) -> str:
 
 def needs_evidence(text: str) -> bool:
     q = normalize(text)
+    # O escopo é parte da persona, extraída do manual. Recusar um acessório
+    # não exige consultar estoque/preço de um produto que não comercializamos.
+    accessory = re.search(r"\b(cabos?|pedais|pedal|palhetas?|amplificadores?|cases?)\b", q)
+    operational = any(word in q for word in ("pedido", "devol", "troca", "garantia", "frete", "entrega"))
+    if accessory and not operational:
+        return False
     return any(word in q for word in (
         "prec", "custa", "valor", "estoque", "dispon", "pedido", "rastre", "pix", "promoc", "desconto",
         "horario", "abre", "funciona", "endereco", "whatsapp", "telefone", "frete", "entrega", "devol",
@@ -160,6 +167,10 @@ class Agent:
         started = time.monotonic()
         today = datetime.now(ZoneInfo("America/Campo_Grande")).date().isoformat()
         system = SystemMessage(content=SYSTEM_PROMPT + f"\nData da execução: {today}.")
+        if session.last_product_id is not None:
+            system.content += (f"\nProduto da conversa anterior: ID {session.last_product_id}. "
+                               "Isso resolve referências como 'ele', mas não substitui consultar get_product "
+                               "novamente para preço/PIX. Se o cliente perguntar outro nome, faça uma nova busca.")
         previous = session.turns[-self.settings.max_history_turns:]
         # Remover turnos completos preserva o protocolo de chamada/resultado.
         while previous and sum(len(str(m.content)) for turn in previous for m in turn) > 12000:
@@ -169,6 +180,7 @@ class Agent:
         sources: dict[str, Source] = {}
         events: list[ToolEvent] = []
         allowed_money = money_values(text)
+        promotions: dict[int, dict] = {}
         model_calls = 0
         input_tokens = output_tokens = 0
         measured_usage = False
@@ -195,13 +207,31 @@ class Agent:
                 if not calls:
                     candidate = message_text(result)
                     values = money_values(candidate)
+                    if candidate and not events and (needs_evidence(text) or values):
+                        turn.pop()
+                        hint = (f" Para o produto anterior use get_product com product_id={session.last_product_id}."
+                                if session.last_product_id else "")
+                        turn.append(HumanMessage(content="Antes de responder à pergunta original, consulte a ferramenta adequada NESTA mensagem. O histórico não é uma consulta atual." + hint,
+                                                 additional_kwargs={"application_note": True}))
+                        continue
                     if values - allowed_money:
-                        turn.append(HumanMessage(content="Sua resposta incluiu um valor em reais sem suporte no resultado consultado. Reescreva usando somente os valores retornados pelas ferramentas; não acumule descontos nem faça novo cálculo."))
+                        turn.pop()
+                        turn.append(HumanMessage(content="Sua resposta incluiu um valor em reais sem suporte no resultado consultado. Reescreva usando somente os valores retornados pelas ferramentas; não acumule descontos nem faça novo cálculo.",
+                                                 additional_kwargs={"application_note": True}))
                         continue
                     if candidate and (events or not (needs_evidence(text) or values)):
+                        disclosures = []
+                        for product in promotions.values():
+                            price = product["price"]
+                            if price["final_cents"] in values and price["original_cents"] not in values:
+                                disclosures.append(f"{product['name']}: de {price['original_price']} por {price['final_price']} ({price['discount_percent']}% de desconto). O PIX não acumula com essa promoção.")
+                        if disclosures:
+                            candidate += "\n\n" + "\n".join(disclosures)
+                            result.content = candidate
                         answer, status, completed = candidate, "ok", True
                         break
-                    turn.append(HumanMessage(content="Antes de responder, consulte a ferramenta adequada. Não afirme fatos da loja sem uma consulta nesta mensagem."))
+                    turn.append(HumanMessage(content="Antes de responder, consulte a ferramenta adequada. Não afirme fatos da loja sem uma consulta nesta mensagem.",
+                                             additional_kwargs={"application_note": True}))
                     continue
                 if len(events) + len(calls) > self.settings.max_tool_calls_per_turn:
                     answer = "Essa solicitação exigiu consultas demais. Vamos tratar uma pergunta por vez?"
@@ -216,8 +246,11 @@ class Agent:
                             tool = self.tools[name]
                             args = tool.args_schema.model_validate(call["args"]).model_dump()
                             payload = tool.func(**args)
-                    except ValidationError:
-                        payload = {"status": "needs_clarification", "message": "Argumentos inválidos. Corrija os campos da ferramenta ou peça esclarecimento.", "sources": []}
+                    except ValidationError as error:
+                        payload = {"status": "needs_clarification", "message": "Argumentos inválidos. Corrija os campos indicados e tente a ferramenta novamente, sem acrescentar campos extras.",
+                                   "validation_errors": [{"field": ".".join(map(str, item["loc"])), "message": item["msg"]}
+                                                         for item in error.errors(include_input=False, include_context=False, include_url=False)],
+                                   "sources": []}
                     except Exception:
                         payload = {"status": "error", "message": "Não foi possível consultar esta fonte agora. Não invente o resultado.", "sources": []}
                     for raw in payload.get("sources", []):
@@ -225,6 +258,17 @@ class Agent:
                         sources[source.id] = source
                     payload_text = json.dumps(payload, ensure_ascii=False, default=str)
                     allowed_money.update(money_values(payload_text))
+                    product = payload.get("product")
+                    if not product and len(payload.get("products", [])) == 1:
+                        product = payload["products"][0]
+                    if "products" in payload and len(payload["products"]) != 1:
+                        session.last_product_id = None
+                    if product:
+                        session.last_product_id = product["product_id"]
+                    quoted_products = payload.get("products", []) + ([payload["product"]] if payload.get("product") else [])
+                    for quoted in quoted_products:
+                        if quoted.get("price") and quoted["price"]["discount_origin"] == "promotion":
+                            promotions[quoted["product_id"]] = quoted
                     events.append(ToolEvent(tool=name if name in self.tools else "unknown",
                                             status=payload["status"], duration_ms=round((time.monotonic() - tick) * 1000),
                                             source_count=len(payload.get("sources", []))))
@@ -241,7 +285,8 @@ class Agent:
             # Resposta pública estável; sem registrar prompts, chaves ou retornos brutos.
             answer = "Não consegui acessar o modelo agora. Verifique se o Ollama está em execução e o modelo está instalado, ou revise a configuração do provedor. Você pode tentar novamente."
         if completed:
-            session.turns = [*previous, turn][-self.settings.max_history_turns:]
+            clean_turn = [m for m in turn if not m.additional_kwargs.get("application_note")]
+            session.turns = [*previous, clean_turn][-self.settings.max_history_turns:]
         else:
             # Não guardar chamadas incompletas num histórico que será reenviado.
             session.turns = [*previous, [HumanMessage(content=text), AIMessage(content=answer)]][-self.settings.max_history_turns:]

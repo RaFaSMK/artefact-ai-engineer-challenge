@@ -1,14 +1,17 @@
 """Quatro ferramentas com schemas fechados e contexto de acesso no backend."""
 
 from decimal import Decimal
-from typing import Literal
+from typing import Annotated, Literal
 
 from langchain_core.tools import StructuredTool
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, BeforeValidator, ConfigDict, Field
 
 from .repository import Repository
 
-Payment = Literal["pix", "credit", "debit", "boleto"]
+Payment = Annotated[
+    Literal["pix", "credit", "debit", "boleto"],
+    BeforeValidator(lambda value: value.strip().lower() if isinstance(value, str) else value),
+]
 
 
 class Arguments(BaseModel):

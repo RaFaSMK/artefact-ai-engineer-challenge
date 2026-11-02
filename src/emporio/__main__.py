@@ -3,6 +3,7 @@
 import argparse
 import asyncio
 import json
+import sys
 
 from .agent import Agent
 from .config import Settings
@@ -46,6 +47,10 @@ async def run_chat(settings):
 
 
 def main():
+    # No Windows, pipes podem usar cp1252 embora o modelo retorne emojis/Unicode.
+    for stream in (sys.stdin, sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8")
     parser = argparse.ArgumentParser(description="Atendimento da Empório da Música")
     parser.add_argument("command", choices=["ingest", "serve", "chat"])
     parser.add_argument("--port", type=int, default=8000)
