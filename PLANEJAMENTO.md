@@ -6,7 +6,7 @@
 
 **Diretriz atualizada:** começar local pelo Ollama, usar LangChain para integrar modelos, mensagens e ferramentas, permitir troca de provedor pelo `.env` e entregar um chat web simples sobre uma API Python. A CLI permanece como entrada de apoio para diagnóstico.
 
-**Status deste documento:** planejamento baseado na leitura dos dois PDFs e na conferência dos seis CSVs. O agente ainda não foi implementado e nenhum resultado de execução do agente foi medido. As verificações dos dados já realizadas aparecem na seção 3.
+**Status deste documento:** primeira implementação local disponível em 01/11/2026, com núcleo Python, LangChain, API, chat web e CLI. A suíte automatizada foi executada com 45 testes passando. As conversas e a avaliação com o Qwen real estão em `examples/`; consulte o [README](README.md) para executar e o registro ao final do guia para estudar a versão implementada. A publicação no GitHub e o envio ao processo seletivo permanecem pendentes.
   
 O documento complementar [GUIA_ESTUDO_ENTREVISTA.md](GUIA_ESTUDO_ENTREVISTA.md) explica a arquitetura, os pontos de estudo e o roteiro de apresentação. Ele deverá ser atualizado conforme a implementação real.
 
@@ -22,7 +22,7 @@ O diferencial será o cuidado com a informação: preço calculado corretamente,
 
 ### Escopo fechado para os dois dias
 
-| Vamos entregar | Como demonstrar |
+| Entrega local | Como demonstrar |
 | --- | --- |
 | Persona acolhedora, informal e profissional | Respostas curtas em português, alinhadas ao manual |
 | Busca e consulta de produtos | Nome, categoria, orçamento, status, estoque e preço |
@@ -172,8 +172,8 @@ flowchart TD
 | Orquestração | Loop Python explícito usando mensagens e ferramentas LangChain | Quatro ferramentas e um fluxo curto; controle visível, sem um grafo adicional |
 | Provedor inicial | Ollama local, com alternativa OpenAI configurável | Aproveitar o computador disponível e permitir troca por ambiente |
 | Integração do modelo | `ChatOllama` ou `ChatOpenAI`, selecionado em `llm.py` | Reutilizar a interface do LangChain e os conectores específicos de cada provedor |
-| Modelo local candidato | `llama3.1:8b`, configurável em `LLM_MODEL` | Validar chamadas de ferramentas e latência; tamanho maior não é uma melhoria garantida |
-| Alternativa já instalada | `qwen3:14b` no Ollama | Pode validar a integração antes de baixar o Llama; não foi comparado neste desafio |
+| Modelo local usado | `qwen3:14b`, configurável em `LLM_MODEL` | Modelo já instalado, usado nas conversas e na avaliação real |
+| Alternativa Llama | `llama3.1:8b` no Ollama | Troca configurável após instalar o modelo; comportamento ainda não comparado |
 | Alternativa remota | `gpt-5.4-mini` | Opção configurável a validar com chave e acesso, sem migração automática |
 | Dados estruturados | SQLite pelo módulo `sqlite3` | Relações e filtros exatos com arquivo local e sem servidor separado |
 | Políticas | Extração com `pypdf`, divisão por seção, busca textual SQLite FTS5 | Corpus pequeno de oito páginas; começar com recuperação simples e inspecionável |
@@ -184,7 +184,7 @@ flowchart TD
 
 A documentação do [Llama 3.1 no Ollama](https://ollama.com/library/llama3.1) lista suporte a ferramentas. Isso habilita um candidato, mas não comprova qualidade neste desafio. Confirmar uma chamada completa de ferramenta e uma resposta final na primeira hora de integração. A documentação também confirma function calling na [alternativa remota](https://developers.openai.com/api/docs/models/gpt-5.4-mini). A decisão final depende dos cenários da seção 8, sem transformar o prazo em uma comparação extensa de modelos.
 
-Na conferência local de 01/11/2026 foram observados Ryzen 5 5500, 32 GB de RAM, GPU AMD Radeon RX 9060 XT, Ollama instalado e `qwen3:14b` disponível. A VRAM não foi confirmada. Não foi executado benchmark, inferência ou download de modelo nesta revisão. Memória, aceleração efetiva da GPU e tamanho de contexto precisam ser observados antes de prometer desempenho.
+Na conferência local de 01/11/2026 foram observados Ryzen 5 5500, 32 GB de RAM, GPU AMD Radeon RX 9060 XT, Ollama instalado e `qwen3:14b` disponível. A VRAM não foi confirmada. Naquela conferência inicial ainda não havia inferências. A implementação posterior foi validada com Qwen local; as durações observadas estão no relatório, sem comparação com outros modelos. Memória, aceleração efetiva da GPU e tamanho de contexto precisam ser observados antes de prometer desempenho.
 
 O [SQLite em Python](https://docs.python.org/3/library/sqlite3.html) atende ao armazenamento local. A [extensão FTS5](https://www.sqlite.org/fts5.html) oferece busca textual. A justificativa de usá-los aqui vem do tamanho e da estrutura dos materiais recebidos.
 
@@ -262,12 +262,12 @@ Configuração local planejada, após instalar o modelo escolhido:
 
 ```dotenv
 LLM_PROVIDER=ollama
-LLM_MODEL=llama3.1:8b
+LLM_MODEL=qwen3:14b
 LLM_BASE_URL=http://localhost:11434
 LLM_API_KEY=
 ```
 
-O conector nativo `ChatOllama` usa o endereço raiz do Ollama. O `/v1` do plano anterior era específico da alternativa de compatibilidade OpenAI e deixa de ser usado no perfil local. A chave é ignorada pela nossa factory nesse perfil e pode ficar vazia. Para aproveitar o modelo já instalado, mudar apenas `LLM_MODEL=qwen3:14b`, sujeito aos testes de comportamento.
+O conector nativo `ChatOllama` usa o endereço raiz do Ollama, sem `/v1`. A chave é ignorada pela factory nesse perfil e pode ficar vazia. O modelo inicial foi definido como Qwen por já estar instalado. Para experimentar Llama, executar `ollama pull llama3.1:8b`, alterar `LLM_MODEL` e repetir os testes de comportamento.
 
 Configuração remota alternativa:
 
@@ -293,7 +293,7 @@ Responsabilidades:
 
 **Por que LangChain agora:** a troca entre provedores passou a ser uma preferência explícita, e a vaga valoriza contato com o framework. As integrações e os tipos comuns reduzem código específico que precisaríamos manter. O loop explícito é mantido porque o fluxo é curto e deve ser fácil de rastrear. Um grafo LangGraph pode ser uma evolução se surgirem ramificações, retomadas ou intervenção humana que justifiquem esse estado adicional.
 
-Limitar a preparação inicial do modelo a cerca de 45 minutos, dentro do bloco de ambiente. Validar primeiro uma chamada completa de ferramenta. Se preparar o Llama exigir mais trabalho, o Qwen já instalado permite testar a integração. Nenhum desses candidatos foi executado no agente nesta preparação.
+Limitar a preparação inicial do modelo a cerca de 45 minutos, dentro do bloco de ambiente. Validar primeiro uma chamada completa de ferramenta. Se preparar o Llama exigir mais trabalho, o Qwen já instalado permite testar a integração. Na implementação, o Qwen foi executado e avaliado. Llama e a alternativa remota permanecem sem avaliação real.
 
 Validar a factory com as duas configurações e testar que o mesmo loop recebe mensagens/chamadas no formato comum. Depois repetir os casos críticos com o modelo real escolhido. A alternativa remota só será descrita como testada se houver execução real; caso contrário, registrar a limitação.
 
@@ -366,15 +366,15 @@ Exemplos já calculados a partir dos dados, ainda sem execução do agente:
 - Em devolução, perguntar canal de compra, recebimento e demais informações relevantes; consultar o manual; não aprovar ou executar uma operação.
 - Em reclamações, explicar o encaminhamento previsto no manual, sem dizer “registrei” ou “encaminhei” se não existir integração que realizou a ação.
 
-## 6. Organização proposta do projeto
+## 6. Organização do projeto
 
-A árvore abaixo é uma proposta, ainda não criada. Evitar multiplicar módulos antes que isso ajude a leitura.
+A árvore abaixo corresponde à organização implementada. Os arquivos de entrada permanecem preservados e os artefatos de execução ficam fora do Git.
 
 ```text
 artefact-atendimento/
 ├── README.md
 ├── pyproject.toml
-├── arquivo de dependências travadas
+├── requirements-lock.txt
 ├── .env.example
 ├── .gitignore
 ├── data/                         # arquivos originais fornecidos
@@ -403,7 +403,7 @@ artefact-atendimento/
 
 Configurações planejadas: `LLM_PROVIDER`, `LLM_MODEL`, `LLM_BASE_URL`, `LLM_API_KEY`, timeout, caminho da base, habilitação do modo técnico e cliente da demonstração. A factory usa `LLM_API_KEY` explicitamente no perfil remoto; este projeto não dependerá de uma segunda chave chamada `OPENAI_API_KEY`. A chave real nunca entra no código, no navegador, nos exemplos ou no Git. O arquivo `.env.example` contém apenas nomes e valores ilustrativos, com o destino local como padrão.
 
-O README final deverá fornecer comandos reais e testados para criar o ambiente, instalar, carregar a base, iniciar o servidor web, abrir o chat, usar a CLI e rodar os testes. Este planejamento não apresenta comandos de uma aplicação que ainda não existe.
+O README final deverá fornecer comandos reais e testados para criar o ambiente, instalar, carregar a base, iniciar o servidor web, abrir o chat, usar a CLI e rodar os testes. Os comandos efetivamente executáveis estão no README; as seções de cronograma registram a organização do trabalho.
 
 ## 7. Execução em dois dias
 
@@ -555,27 +555,27 @@ Após cada etapa, registrar no guia: o que foi implementado, por que, como foi v
 ## 12. Checklist de conclusão
 
 - [ ] Horário exato da entrega conferido no e-mail.
-- [ ] Ollama e modelo escolhido funcionando desde o início da implementação.
-- [ ] Factory ChatOllama/ChatOpenAI e `.env.example` documentados; alternativa remota validada ou explicitamente marcada como não testada.
-- [ ] Ferramentas vinculadas pelo LangChain com argumentos, permissões e execução validados no código.
-- [ ] Python principal, quatro ferramentas e persona implementados.
-- [ ] Preço, estoque, promoções e pedidos consultados na base.
-- [ ] Políticas recuperadas com seção/página e ambiguidade tratada.
-- [ ] Valores e acesso aos pedidos controlados pelo código.
-- [ ] Histórico da sessão funcionando em uma continuação.
-- [ ] Chat web e CLI chamam o mesmo núcleo Python.
-- [ ] API valida mensagens e mantém conversas separadas.
-- [ ] Carregamento, nova conversa, fontes e falha do modelo conferidos no navegador.
-- [ ] Modo técnico mostra apenas eventos reais e dados adequados para a demonstração.
-- [ ] Falhas e ausência de dados tratadas sem inventar resposta.
-- [ ] Testes essenciais passando; conversas com o modelo real revisadas.
-- [ ] Cinco conversas reais, com pelo menos um cenário não trivial.
-- [ ] Relatório curto de avaliação corresponde aos testes e execuções realizados.
-- [ ] Ambiente novo consegue executar os comandos do README.
-- [ ] README declara decisões, limitações e uso real de IA.
-- [ ] Nenhuma chave, ambiente virtual, banco gerado ou log desnecessário versionado.
+- [x] Ollama e modelo escolhido funcionando desde o início da implementação.
+- [x] Factory ChatOllama/ChatOpenAI e `.env.example` documentados; alternativa remota validada ou explicitamente marcada como não testada.
+- [x] Ferramentas vinculadas pelo LangChain com argumentos, permissões e execução validados no código.
+- [x] Python principal, quatro ferramentas e persona implementados.
+- [x] Preço, estoque, promoções e pedidos consultados na base.
+- [x] Políticas recuperadas com seção/página e ambiguidade tratada.
+- [x] Valores e acesso aos pedidos controlados pelo código.
+- [x] Histórico da sessão funcionando em uma continuação.
+- [x] Chat web e CLI chamam o mesmo núcleo Python.
+- [x] API valida mensagens e mantém conversas separadas.
+- [x] Carregamento, nova conversa e fontes conferidos no navegador; falha do modelo coberta nos testes.
+- [x] Modo técnico mostra apenas eventos reais e dados adequados para a demonstração.
+- [x] Falhas e ausência de dados tratadas sem inventar resposta.
+- [x] Testes essenciais passando; conversas com o modelo real revisadas.
+- [x] Cinco conversas reais, com pelo menos um cenário não trivial.
+- [x] Relatório curto de avaliação corresponde aos testes e execuções realizados.
+- [x] Ambiente novo consegue executar os comandos do README.
+- [x] README declara decisões, limitações e uso real de IA.
+- [x] Nenhuma chave, ambiente virtual, banco gerado ou log desnecessário versionado.
 - [ ] Repositório público e histórico de commits conferidos.
-- [ ] Guia atualizado para corresponder à versão final.
+- [x] Guia atualizado para corresponder à versão final.
 - [ ] Apresentação de 5–7 minutos ensaiada e uma consulta rastreada no código.
 - [ ] Commit final identificado e repositório congelado no prazo.
 

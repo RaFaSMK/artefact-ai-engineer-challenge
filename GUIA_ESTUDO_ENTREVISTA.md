@@ -2,7 +2,7 @@
 
 **Data:** 01/11/2026. **Leitura complementar:** [PLANEJAMENTO.md](PLANEJAMENTO.md).
 
-Este guia acompanha uma solução ainda planejada. A leitura dos materiais e a conferência inicial dos dados já foram feitas; o agente, seus testes e suas conversas ainda serão implementados. A direção atual inclui LangChain para modelos/ferramentas, execução local pelo Ollama e um chat web simples sobre API Python. As falas abaixo devem ser adaptadas ao que realmente funcionar na versão entregue.
+Este guia acompanha a primeira versão implementada em 01/11/2026: Python, LangChain, Qwen local pelo Ollama, API, chat web e CLI. As evidências estão no README, nos testes e em `examples/`. Use o registro de implementação ao final para distinguir o que foi verificado das limitações. Antes da entrevista, estude e reproduza os fluxos para poder explicá-los com suas próprias palavras.
 
 Você já tem experiência com Python, LLMs e ferramentas. O foco será entender as decisões específicas deste projeto, acompanhar um fluxo no código e sustentar os limites da solução. Não é necessário preparar uma aula sobre todas as tecnologias de agentes.
 
@@ -14,11 +14,11 @@ O problema da loja é o volume de perguntas repetidas. O protótipo ajuda a resp
 
 Uma explicação curta da proposta:
 
-> “Vou construir um agente em Python com quatro ferramentas e um chat web simples. Para preço, estoque e pedidos, ele consulta dados estruturados. Para regras da loja, recupera trechos do manual. LangChain conecta os modelos e as ferramentas, e a configuração permite começar local pelo Ollama. O backend concentra as regras e também pode ser usado por uma CLI de apoio.”
+> “Construí um agente em Python com quatro ferramentas e um chat web simples. Para preço, estoque e pedidos, ele consulta dados estruturados. Para regras da loja, recupera trechos do manual. Usei LangChain para integrar os modelos e as ferramentas, começando com Qwen local pelo Ollama. A configuração permite trocar de modelo, e o mesmo núcleo atende API e CLI.”
 
-Depois da implementação, trocar o futuro pelo passado apenas nas partes comprovadas.
+Essa fala descreve o repositório implementado com apoio de IA. Só afirme que você pessoalmente revisou ou reproduziu uma parte depois de fazer isso.
 
-## 2. O que cada parte fará
+## 2. O que cada parte faz
 
 | Parte | Responsabilidade | Exemplo |
 | --- | --- | --- |
@@ -73,7 +73,7 @@ Usar uma única busca de texto para todos esses casos perderia filtros e relaç�
 
 O cálculo de um desconto deve produzir o mesmo resultado para as mesmas entradas. O texto da resposta pode variar sem que o preço varie.
 
-No Ohana CK-20, a base fornece R$ 549,00 e promoção ativa de 20%. O resultado calculado é R$ 439,20. O manual não permite acumular mais 5% de PIX nesse preço. Essa verificação será feita em código e em teste, com um exemplo real de conversa.
+No Ohana CK-20, a base fornece R$ 549,00 e promoção ativa de 20%. O resultado calculado é R$ 439,20. O manual não permite acumular mais 5% de PIX nesse preço. Essa regra foi implementada e verificada em testes e em uma conversa real.
 
 **O que demonstrar:** o cálculo em `pricing.py` proposto e o teste que evita desconto cumulativo. Não explicar essa garantia apenas como uma instrução no prompt.
 
@@ -91,15 +91,15 @@ A proposta reduz esse risco com ferramentas, regras determinísticas, recuperaç
 
 ### 3.7 Modelo local e configuração modular
 
-Llama é o modelo e Ollama é o executor local proposto. A preferência atual é começar local e selecionar a integração LangChain em `llm.py`. O computador já possui Ollama e `qwen3:14b`; o `llama3.1:8b` é o candidato Llama a preparar e validar. Não foram executados testes do agente com nenhum deles.
+Llama é o modelo e Ollama é o executor local proposto. A preferência atual é começar local e selecionar a integração LangChain em `llm.py`. A implementação usa `qwen3:14b` já instalado, com conversas reais e avaliação registrada. `llama3.1:8b` continua como alternativa configurável que precisa ser instalada e avaliada.
 
-O `.env` selecionará `LLM_PROVIDER`, `LLM_MODEL`, `LLM_BASE_URL` e `LLM_API_KEY`. A factory criará `ChatOllama` ou `ChatOpenAI`. No perfil nativo Ollama, a URL será `http://localhost:11434`, sem `/v1`, e não é necessário preencher a chave. Mudar de modelo no mesmo executor normalmente altera `LLM_MODEL`; mudar para a API remota altera também destino e credencial. Reiniciar a aplicação carrega a configuração. Os exemplos completos estão na seção 4.7 do planejamento.
+O `.env` seleciona `LLM_PROVIDER`, `LLM_MODEL`, `LLM_BASE_URL` e `LLM_API_KEY`. A factory cria `ChatOllama` ou `ChatOpenAI`. No perfil nativo Ollama, a URL será `http://localhost:11434`, sem `/v1`, e não é necessário preencher a chave. Mudar de modelo no mesmo executor normalmente altera `LLM_MODEL`; mudar para a API remota altera também destino e credencial. Reiniciar a aplicação carrega a configuração. Os exemplos completos estão na seção 4.7 do planejamento.
 
 **Como explicar a decisão:**
 
 > “Comecei local para aproveitar o computador disponível. Usei as integrações de modelos do LangChain e uma factory pequena para selecionar o provedor pelo ambiente. As consultas e as regras continuam independentes dessa escolha. Cada modelo precisa passar pelos mesmos cenários de avaliação.”
 
-Usar o passado somente depois da implementação. Não confundir ausência de cobrança por uma API com ausência de custo de hardware, energia ou tempo.
+O passado descreve a versão implementada. Não confundir ausência de cobrança por uma API com ausência de custo de hardware, energia ou tempo.
 
 As integrações de [ChatOllama](https://docs.langchain.com/oss/python/integrations/chat/ollama) e [ChatOpenAI](https://docs.langchain.com/oss/python/integrations/chat/openai) permitem usar a interface de modelos LangChain. Parâmetros específicos ficam na factory. As regras de preço e acesso continuam no projeto. A troca não garante a mesma qualidade, os mesmos recursos ou o mesmo tempo de resposta.
 
@@ -344,24 +344,33 @@ Após implementar, completar uma descrição fiel, por exemplo:
 
 Não decorar esse texto sem preencher as evidências. Uma boa preparação inclui identificar uma sugestão da IA que você modificou, uma decisão que confirmou nos dados e uma limitação que preferiu declarar.
 
-## 13. Registro de decisões e evidências
+## 13. Registro de decisões e evidências da implementação
 
-Preencher durante a implementação. Esta tabela está intencionalmente sem resultados: o projeto ainda não foi executado.
+Registro da versão local verificada. Os comandos executáveis estão no README. A revisão pessoal do candidato e o ensaio ainda precisam ser feitos.
 
-| Etapa | Decisão realmente tomada | Verificação executada e resultado | Evidência/commit | Limitação conhecida |
+| Etapa | Decisão implementada | Verificação realizada | Evidência | Limitação |
 | --- | --- | --- | --- | --- |
-| Dados e importação | A registrar | A executar | A registrar | A registrar |
-| Busca de políticas | A registrar | A executar | A registrar | A registrar |
-| Preços e disponibilidade | A registrar | A executar | A registrar | A registrar |
-| Acesso a pedidos | A registrar | A executar | A registrar | A registrar |
-| Agente e modelo | A registrar | A executar | A registrar | A registrar |
-| Configuração local/remota | A registrar | A executar | A registrar | A registrar |
-| API e chat web | A registrar | A executar | A registrar | A registrar |
-| Relatório de avaliação | A registrar | A executar | A registrar | A registrar |
-| Histórico da sessão | A registrar | A executar | A registrar | A registrar |
-| Falhas e limites | A registrar | A executar | A registrar | A registrar |
-| Cinco conversas | A registrar | A executar | A registrar | A registrar |
-| Instalação limpa | A registrar | A executar | A registrar | A registrar |
+| Dados | SQLite, importação atômica, clientes somente por ID | Contagem, relações, idempotência e falha sem perda da base | `tests/test_data.py` | Snapshot estático |
+| Políticas | 28 seções com página, mapa de assuntos e FTS5 | Casos de pagamento, contato, frete e devolução | `policies.py` e testes | Extração específica do manual |
+| Dinheiro | Decimal, centavos, PIX não cumulativo e apresentação do preço original | Valores exatos e conflito de promoções | `pricing.py` e testes | Não há checkout |
+| Pedidos | Cliente fictício 2 no backend | Pedido 8 autorizado e resposta genérica para pedido de outro cliente | Testes e `examples/03_pedido.md` | Não autentica pessoas reais |
+| Modelos | Factory ChatOllama/ChatOpenAI | Qwen real; factory remota sem requisição externa | `llm.py` e relatório | Llama e OpenAI sem avaliação real |
+| Conversa | Último ID inequívoco e histórico com turnos completos | Continuação no PIX com nova consulta | Testes e `examples/02_promocao_pix.md` | Memória só durante a sessão |
+| Web/API | Mesma função de atendimento, fontes do executor | Navegador: envio, carregamento, fontes, modo técnico, nova conversa e layout a 390px | Imagens em `examples/` e testes HTTP | Sem streaming nem autenticação de produção |
+| Avaliação | Critérios explícitos e transcrições reais | 14 cenários com Qwen; ver resultado e durações no relatório | `examples/avaliacao.md` | Não mede qualidade geral |
+| Instalação | Python 3.12 e dependências travadas | Instalação em um segundo ambiente virtual e suíte passando | `requirements-lock.txt`, 45 testes | Outros sistemas/versões não verificados |
+
+### O que os testes reais ensinaram
+
+1. **Nome e categoria podem divergir.** O modelo inicialmente inferiu uma categoria errada para o Ohana. A busca passou a tolerar pontuação e recuperar o candidato em outra categoria, com pedido de esclarecimento, em vez de afirmar que o produto não existe.
+2. **Memória não atualiza preço.** Uma continuação sobre PIX pode induzir o modelo a repetir o histórico sem consultar. O backend guarda o ID inequívoco, reforça a necessidade de consulta nova e não aceita valores em reais sem suporte nas fontes do turno. Lembretes de aplicação são removidos do histórico que será reutilizado.
+3. **Uma lacuna de política precisa permanecer uma lacuna.** Na primeira bateria, o caso de frete de exatamente R$ 500 falhou na verificação. Agora, depois de recuperar a seção 5.1, uma regra explícita exige confirmação e impede inventar gratuidade ou cobrança.
+4. **Preço correto não basta para comunicar uma promoção.** Quando o modelo informa o valor promocional sem o original, o executor completa a apresentação usando os dados calculados da ferramenta.
+5. **Recusar fora do escopo não exige inventar uma consulta.** A persona já incorpora que a loja não vende acessórios. Essa recusa pode ser direta; preços e pedidos continuam exigindo consultas.
+
+### Como apresentar a avaliação
+
+Abra `examples/avaliacao.md` e uma das cinco transcrições. Mostre os critérios e explique que foram verificações específicas de fonte, ferramenta e conteúdo. A suíte de 45 testes cobre regras e contratos de forma determinística. O resultado de uma bateria pequena não garante que qualquer pergunta futura será respondida corretamente.
 
 Para um problema encontrado, acrescentar uma anotação curta:
 
@@ -407,3 +416,14 @@ O objetivo do ensaio é conseguir explicar causa e consequência: qual problema 
 - **Próximo passo:** escolhido por uma limitação observada, sem lista de tecnologias decorativa.
 
 Antes de usar esta folha, corrigir qualquer item que não tenha sido mantido na implementação final.
+
+## 16. Conferência final da versão local
+
+- 45 testes determinísticos passaram no ambiente principal e no segundo ambiente criado para verificar a instalação.
+- A execução real registrada passou nos 14 critérios específicos do relatório com Qwen local. Os critérios não avaliam toda a qualidade editorial.
+- A CLI foi usada com entrada Unicode e resposta com emoji no Windows; `/nova` e `/sair` foram conferidos.
+- A revisão do navegador cobriu envio, carregamento, resposta, fontes, modo técnico, nova conversa e layout estreito, sem erros observados no console.
+- A validação das ferramentas informa campo e motivo do erro sem devolver os valores recebidos. PIX aceita normalização de maiúsculas e espaços, preservando o conjunto de formas permitido.
+- O relatório contém a identificação dos componentes de atendimento avaliados. API e CLI são verificados separadamente pelos testes e pela conferência de uso.
+- A revisão manual encontrou sugestões e frases a polir, descritas no relatório. Não afirmar que os testes garantem ausência de alucinação ou tom perfeito.
+- Estudar o código, ensaiar a apresentação, conferir o horário do processo e publicar o repositório ainda são etapas do candidato.
